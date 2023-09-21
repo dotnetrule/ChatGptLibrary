@@ -53,7 +53,7 @@ namespace ChatGptLibrary
                 var response = await _client.PostAsync(_apiUrl, content);
                 response.EnsureSuccessStatusCode();
                 var responseData = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Response; {responseData}");
+                Console.Write($"Response; {responseData}");
 
                 return responseData;
             }
