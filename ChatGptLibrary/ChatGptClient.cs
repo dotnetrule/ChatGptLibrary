@@ -1,4 +1,7 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ChatGptLibrary
 {
@@ -19,13 +22,15 @@ namespace ChatGptLibrary
 
         public async Task<string> GenerateResponse(string prompt, int maxTokens = 50)
         {
-            var requestData = new
+            var requestData = new 
             {
                 prompt = prompt,
                 max_tokens = maxTokens
             };
+            var jsonRequest = JsonSerializer.Serialize(requestData);
+            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-            var response = await _client.PostAsJsonAsync(_apiUrl, requestData);
+            var response = await _client.PostAsync(_apiUrl, content);
             response.EnsureSuccessStatusCode();
 
             var responseBody = await response.Content.ReadAsStringAsync();
