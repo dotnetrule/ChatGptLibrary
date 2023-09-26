@@ -2,6 +2,7 @@
 using ChatGptLibrary.Responses;
 using System;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace ChatGptLibrary
         private readonly HttpClient _client;
         private readonly string _apiKey;
         private readonly string _apiUrl;
-        private string _model;
+        private string _model { get; set; }
 
 
         public ChatGptClient(string apiKey, string organizationId)
@@ -34,18 +35,34 @@ namespace ChatGptLibrary
             return response;
         }
 
-        public async Task<string> GenerateResponseAsString(string prompt, double temperature = 0.7)
+        public async Task<string> GenerateResponseAsString(string prompt, double temperature = 0)
         {
             var requestData = new 
             {
                 model = _model,
-                messages = new[]
+                max_tokens= 256,
+                messages = new object[]
                 {
-                    new { role = "user", content = prompt }
+                    
+                    new { 
+                        role = "user", 
+                        content = prompt
+                    },
+                    new {
+                        role = "system",
+                        content = "Handle this as short and consise as possible."
+                    }
                 },
                 temperature = temperature
             };
 
+            return await GenerateResponseAsString(requestData);
+        }
+
+
+        public async Task<string> GenerateResponseAsString(object requestData)
+        {
+            
             var jsonRequest = JsonSerializer.Serialize(requestData);
             var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
             try
@@ -57,7 +74,7 @@ namespace ChatGptLibrary
 
                 return responseData;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"{ex.Message} {ex.InnerException}");
                 throw;
